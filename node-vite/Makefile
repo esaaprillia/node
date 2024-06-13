@@ -4,39 +4,40 @@
 
 include $(TOPDIR)/rules.mk
 
-PKG_NPM_NAME:=telegram-tt
+PKG_NPM_NAME:=vite
 PKG_NAME:=node-$(PKG_NPM_NAME)
-PKG_VERSION:=10.9.7
+PKG_VERSION:=5.2.13
 PKG_RELEASE:=1
 
-PKG_SOURCE:=$(PKG_NPM_NAME)-$(PKG_VERSION).tar.gz
-PKG_SOURCE_SUBDIR:=$(PKG_NAME)-$(PKG_VERSION)
-PKG_SOURCE_URL_FILE:=v$(PKG_VERSION).tar.gz
-PKG_SOURCE_URL:=https://github.com/Ajaxy/telegram-tt/archive/refs/tags/
-PKG_HASH:=a8961cd1dcb49c59cf440e5051bf9dacb3046fceb4d44bf578734269b46c462c
-PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
+PKG_SOURCE:=$(PKG_NPM_NAME)-$(PKG_VERSION).tgz
+PKG_SOURCE_URL:=https://registry.npmjs.org/$(PKG_NPM_NAME)/-/
+PKG_HASH:=314792d2c86a216451f8abc4a992f8e9c0b1f1963ce77a6ec8b93d628bc25508
 
-PKG_MAINTAINER:=Esa Aprilia Salsabila <esaapriliasalsabila@gmail.com>
-PKG_LICENSE:=GPL-3.0 license
+PKG_MAINTAINER:=@esaaprillia, Hirokazu MORIKAWA <morikw2@gmail.com>
+PKG_LICENSE:=MIT
 PKG_LICENSE_FILES:=LICENSE
 
-PKG_BUILD_DEPENDS:=node/host node-cross-env/host
+HOST_BUILD_DEPENDS:=node/host
+HOST_BUILD_PARALLEL:=1
+
+PKG_BUILD_DEPENDS:=node/host
 PKG_BUILD_PARALLEL:=1
 PKG_BUILD_FLAGS:=no-mips16
 
+include $(INCLUDE_DIR)/host-build.mk
 include $(INCLUDE_DIR)/package.mk
 
-define Package/node-telegram-tt
+define Package/node-vite
   SUBMENU:=Node.js
   SECTION:=lang
   CATEGORY:=Languages
-  TITLE:=Telegram Web A, GPL v3
-  URL:=https://github.com/Ajaxy/telegram-tt
+  TITLE:=Next Generation Frontend Tooling
+  URL:=https://www.npmjs.com/package/vite
   DEPENDS:=+node
 endef
 
-define Package/node-telegram-tt/description
- Telegram Web A
+define Package/node-vite/description
+ Vite (French word for "quick", pronounced /vit/, like "veet") is a new breed of frontend build tooling that significantly improves the frontend development experience.
 endef
 
 TAR_OPTIONS+= --strip-components 1
@@ -44,6 +45,7 @@ TAR_CMD=$(HOST_TAR) -C $(1) $(TAR_OPTIONS)
 
 NODEJS_CPU:=$(subst powerpc,ppc,$(subst aarch64,arm64,$(subst x86_64,x64,$(subst i386,ia32,$(ARCH)))))
 TMPNPM:=$(shell mktemp -u XXXXXXXXXX)
+HOSTTMPNPM:=$(shell mktemp -u XXXXXXXXXX)
 NPM_CACHE_DIR:=$(if $(call qstrip,$(CONFIG_NODEJS_NPM_CACHE_DIR)),$(call qstrip,$(CONFIG_NODEJS_NPM_CACHE_DIR)),$(TMP_DIR))
 
 TARGET_CFLAGS+=$(FPIC)
@@ -56,31 +58,51 @@ define Build/Compile
 	npm_config_nodedir=$(STAGING_DIR)/usr/ \
 	$(if $(CONFIG_NODEJS_NPM_KEEP_CACHE), npm_config_cache=$(NPM_CACHE_DIR)/npm-cache-$(PKG_NPM_NAME),npm_config_cache=$(TMP_DIR)/npm-cache-$(TMPNPM)) \
 	npm install --prefer-offline --no-audit --global-style --install-strategy=shallow --no-save --omit=dev --no-package-lock --ignore-scripts
-	cd $(PKG_BUILD_DIR); \
-	$(MAKE_VARS) \
-	$(MAKE_FLAGS) \
-	npm_config_nodedir=$(STAGING_DIR)/usr/ \
-	$(if $(CONFIG_NODEJS_NPM_KEEP_CACHE), npm_config_cache=$(NPM_CACHE_DIR)/npm-cache-$(PKG_NPM_NAME),npm_config_cache=$(TMP_DIR)/npm-cache-$(TMPNPM)) \
-	npm run dev
 	rm -rf $(TMP_DIR)/npm-cache-$(TMPNPM)
 	rm -f $(PKG_BUILD_DIR)/node_modules/.package-lock.json
 	find $(PKG_BUILD_DIR)/node_modules -type d -empty -print0 | xargs -0 rmdir || true
+	rm -rf $(PKG_BUILD_DIR)/node_modules/esbuild/node_modules/@esbuild
+	rm -rf $(PKG_BUILD_DIR)/node_modules/rollup/node_modules/@rollup
 endef
 
-define Package/node-telegram-tt/install
+define Package/node-vite/install
 	$(INSTALL_DIR) $(1)/usr/lib/node/$(PKG_NPM_NAME)
-	$(CP) $(PKG_BUILD_DIR)/{package.json,LICENSE,*.md} \
+	$(CP) $(PKG_BUILD_DIR)/{package.json,*.cts,*.cjs,*.ts,*.md} \
 		$(1)/usr/lib/node/$(PKG_NPM_NAME)/
-	$(CP) $(PKG_BUILD_DIR)/{node_modules,lib,index.js} \
+	$(CP) $(PKG_BUILD_DIR)/{bin,dist,types,node_modules} \
 		$(1)/usr/lib/node/$(PKG_NPM_NAME)/
+	$(INSTALL_DIR) $(1)/usr/bin
+	$(LN) ../lib/node/$(PKG_NPM_NAME)/bin/vite.js $(1)/usr/bin/vite
 	$(INSTALL_DIR) $(1)/usr/lib/node_modules
 	$(LN) ../node/$(PKG_NPM_NAME) $(1)/usr/lib/node_modules/$(PKG_NPM_NAME)
 endef
 
-define Package/node-telegram-tt/postrm
+define Package/node-vite/postrm
 #!/bin/sh
-rm /usr/lib/node_modules/telegram-tt || true
-rm -rf /usr/lib/node/telegram-tt || true
+rm /usr/lib/node_modules/vite || true
+rm -rf /usr/lib/node/vite || true
 endef
 
-$(eval $(call BuildPackage,node-telegram-tt))
+define Host/Compile
+	cd $(HOST_BUILD_DIR); \
+	$(HOST_MAKE_VARS) \
+	npm_config_nodedir=$(STAGING_DIR)/usr/ \
+	$(if $(CONFIG_NODEJS_NPM_KEEP_CACHE), npm_config_cache=$(NPM_CACHE_DIR)/host-npm-cache-$(PKG_NPM_NAME),npm_config_cache=$(TMP_DIR)/npm-cache-$(HOSTTMPNPM)) \
+	npm install --prefer-offline --no-audit --global-style --install-strategy=shallow --no-save --omit=dev --no-package-lock --ignore-scripts
+	rm -rf $(TMP_DIR)/npm-cache-$(HOSTTMPNPM)
+	rm -f $(HOST_BUILD_DIR)/node_modules/.package-lock.json
+	find $(HOST_BUILD_DIR)/node_modules -type d -empty -print0 | xargs -0 rmdir || true
+endef
+
+define Host/Install
+	$(INSTALL_DIR) $(1)/lib/node_modules/$(PKG_NPM_NAME)
+	$(CP) $(HOST_BUILD_DIR)/{package.json,*.cts,*.cjs,*.ts,*.md} \
+		$(1)/lib/node_modules/$(PKG_NPM_NAME)/
+	$(CP) $(HOST_BUILD_DIR)/{bin,dist,types,node_modules} \
+		$(1)/lib/node_modules/$(PKG_NPM_NAME)/
+	$(INSTALL_DIR) $(1)/bin
+	$(LN) ../lib/node_modules/$(PKG_NPM_NAME)/bin/vite.js $(1)/bin/vite
+endef
+
+$(eval $(call HostBuild))
+$(eval $(call BuildPackage,node-vite))
