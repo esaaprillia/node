@@ -17,7 +17,7 @@ PKG_MAINTAINER:=@esaaprillia, Hirokazu MORIKAWA <morikw2@gmail.com>
 PKG_LICENSE:=ISC
 PKG_LICENSE_FILES:=LICENSE
 
-HOST_BUILD_DEPENDS:=node/host node-acorn/host node-browserslist/host node-update-browserslist-db/host
+HOST_BUILD_DEPENDS:=node/host
 HOST_BUILD_PARALLEL:=1
 
 PKG_BUILD_DEPENDS:=node/host
@@ -33,7 +33,7 @@ define Package/node-picocolors
   CATEGORY:=Languages
   TITLE:=The tiniest and the fastest library for terminal output formatting with ANSI colors
   URL:=https://www.npmjs.com/package/picocolors
-  DEPENDS:=+node +node-acorn +node-browserslist +node-update-browserslist-db
+  DEPENDS:=+node
 endef
 
 define Package/node-picocolors/description
