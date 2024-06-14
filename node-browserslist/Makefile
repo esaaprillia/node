@@ -17,10 +17,10 @@ PKG_MAINTAINER:=@esaaprillia, Hirokazu MORIKAWA <morikw2@gmail.com>
 PKG_LICENSE:=MIT
 PKG_LICENSE_FILES:=LICENSE
 
-HOST_BUILD_DEPENDS:=node/host
+HOST_BUILD_DEPENDS:=node/host node-update-browserslist-db/host
 HOST_BUILD_PARALLEL:=1
 
-PKG_BUILD_DEPENDS:=node/host
+PKG_BUILD_DEPENDS:=node/host node-update-browserslist-db/host
 PKG_BUILD_PARALLEL:=1
 PKG_BUILD_FLAGS:=no-mips16
 
@@ -33,7 +33,7 @@ define Package/node-browserslist
   CATEGORY:=Languages
   TITLE:=Share target browsers between different front-end tools, like Autoprefixer, Stylelint and babel-preset-env
   URL:=https://www.npmjs.com/package/browserslist
-  DEPENDS:=+node
+  DEPENDS:=+node +node-update-browserslist-db
 endef
 
 define Package/node-browserslist/description
