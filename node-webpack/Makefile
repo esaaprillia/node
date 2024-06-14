@@ -68,7 +68,7 @@ endef
 
 define Package/node-webpack/install
 	$(INSTALL_DIR) $(1)/usr/lib/node/$(PKG_NPM_NAME)
-	$(CP) $(PKG_BUILD_DIR)/{package.json,LICENSE,*.js,*.ts,*.md} \
+	$(CP) $(PKG_BUILD_DIR)/{package.json,LICENSE,*.ts,*.md} \
 		$(1)/usr/lib/node/$(PKG_NPM_NAME)/
 	$(CP) $(PKG_BUILD_DIR)/{bin,hot,lib,schemas,node_modules} \
 		$(1)/usr/lib/node/$(PKG_NPM_NAME)/
@@ -97,7 +97,7 @@ endef
 
 define Host/Install
 	$(INSTALL_DIR) $(1)/lib/node_modules/$(PKG_NPM_NAME)
-	$(CP) $(HOST_BUILD_DIR)/{package.json,LICENSE,*.js,*.ts,*.md} \
+	$(CP) $(HOST_BUILD_DIR)/{package.json,LICENSE,*.ts,*.md} \
 		$(1)/lib/node_modules/$(PKG_NPM_NAME)/
 	$(CP) $(HOST_BUILD_DIR)/{bin,hot,lib,schemas,node_modules} \
 		$(1)/lib/node_modules/$(PKG_NPM_NAME)/
