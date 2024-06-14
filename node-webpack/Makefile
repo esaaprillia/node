@@ -17,7 +17,7 @@ PKG_MAINTAINER:=@esaaprillia, Hirokazu MORIKAWA <morikw2@gmail.com>
 PKG_LICENSE:=MIT
 PKG_LICENSE_FILES:=LICENSE
 
-HOST_BUILD_DEPENDS:=node/host node-acorn/host node-browserslist/host node-update-browserslist-db/host
+HOST_BUILD_DEPENDS:=node/host
 HOST_BUILD_PARALLEL:=1
 
 PKG_BUILD_DEPENDS:=node/host
@@ -33,7 +33,7 @@ define Package/node-webpack
   CATEGORY:=Languages
   TITLE:=A bundler for javascript and friends. Packs many modules into a few bundled assets.
   URL:=https://www.npmjs.com/package/webpack
-  DEPENDS:=+node +node-acorn +node-browserslist +node-update-browserslist-db
+  DEPENDS:=+node
 endef
 
 define Package/node-webpack/description
