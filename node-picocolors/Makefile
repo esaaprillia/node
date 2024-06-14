@@ -1,39 +1,104 @@
+# This is free software, licensed under the GNU General Public License v2.
+# See /LICENSE for more information.
+#
+
 include $(TOPDIR)/rules.mk
 
-PKG_NAME:=sphinxcontrib-applehelp
-PKG_VERSION:=1.0.8
+PKG_NPM_NAME:=picocolors
+PKG_NAME:=node-$(PKG_NPM_NAME)
+PKG_VERSION:=1.0.1
 PKG_RELEASE:=1
 
-PYPI_NAME:=sphinxcontrib_applehelp
-PKG_HASH:=c40a4f96f3776c4393d933412053962fac2b84f4c99a7982ba42e09576a70619
+PKG_SOURCE:=$(PKG_NPM_NAME)-$(PKG_VERSION).tgz
+PKG_SOURCE_URL:=https://registry.npmjs.org/$(PKG_NPM_NAME)/-/
+PKG_HASH:=skip
 
-PKG_MAINTAINER:=Esa Aprilia Salsabila <esaapriliasalsabila@gmail.com>
-PKG_LICENSE:=License
+PKG_MAINTAINER:=@esaaprillia, Hirokazu MORIKAWA <morikw2@gmail.com>
+PKG_LICENSE:=ISC
 PKG_LICENSE_FILES:=LICENSE
 
-HOST_BUILD_DEPENDS:=python-setuptools-scm/host
-PKG_BUILD_DEPENDS:=python-setuptools-scm/host
+HOST_BUILD_DEPENDS:=node/host node-acorn/host node-browserslist/host node-update-browserslist-db/host
+HOST_BUILD_PARALLEL:=1
 
-include $(TOPDIR)/feeds/packages/lang/python/pypi.mk
-include $(INCLUDE_DIR)/package.mk
+PKG_BUILD_DEPENDS:=node/host
+PKG_BUILD_PARALLEL:=1
+PKG_BUILD_FLAGS:=no-mips16
+
 include $(INCLUDE_DIR)/host-build.mk
-include $(TOPDIR)/feeds/packages/lang/python/python3-package.mk
-include $(TOPDIR)/feeds/packages/lang/python/python3-host-build.mk
+include $(INCLUDE_DIR)/package.mk
 
-define Package/python3-sphinxcontrib-applehelp
-  SUBMENU:=Python
+define Package/node-picocolors
+  SUBMENU:=Node.js
   SECTION:=lang
   CATEGORY:=Languages
-  TITLE:=Sphinx applehelp extension
-  URL:=https://github.com/sphinx-doc/sphinxcontrib-applehelp
-  DEPENDS:=+python3
+  TITLE:=The tiniest and the fastest library for terminal output formatting with ANSI colors
+  URL:=https://www.npmjs.com/package/picocolors
+  DEPENDS:=+node +node-acorn +node-browserslist +node-update-browserslist-db
 endef
 
-define Package/python3-sphinxcontrib-applehelp/description
-  sphinxcontrib-applehelp is a sphinx extension which outputs Apple help books.
+define Package/node-picocolors/description
+ The tiniest and the fastest library for terminal output formatting with ANSI colors.
 endef
 
-$(eval $(call Py3Package,python3-sphinxcontrib-applehelp))
-$(eval $(call BuildPackage,python3-sphinxcontrib-applehelp))
-$(eval $(call BuildPackage,python3-sphinxcontrib-applehelp-src))
+TAR_OPTIONS+= --strip-components 1
+TAR_CMD=$(HOST_TAR) -C $(1) $(TAR_OPTIONS)
+
+NODEJS_CPU:=$(subst powerpc,ppc,$(subst aarch64,arm64,$(subst x86_64,x64,$(subst i386,ia32,$(ARCH)))))
+TMPNPM:=$(shell mktemp -u XXXXXXXXXX)
+HOSTTMPNPM:=$(shell mktemp -u XXXXXXXXXX)
+NPM_CACHE_DIR:=$(if $(call qstrip,$(CONFIG_NODEJS_NPM_CACHE_DIR)),$(call qstrip,$(CONFIG_NODEJS_NPM_CACHE_DIR)),$(TMP_DIR))
+
+TARGET_CFLAGS+=$(FPIC)
+TARGET_CPPFLAGS+=$(FPIC)
+
+define Build/Compile
+	cd $(PKG_BUILD_DIR); \
+	$(MAKE_VARS) \
+	$(MAKE_FLAGS) \
+	npm_config_nodedir=$(STAGING_DIR)/usr/ \
+	$(if $(CONFIG_NODEJS_NPM_KEEP_CACHE), npm_config_cache=$(NPM_CACHE_DIR)/npm-cache-$(PKG_NPM_NAME),npm_config_cache=$(TMP_DIR)/npm-cache-$(TMPNPM)) \
+	npm install --prefer-offline --no-audit --global-style --install-strategy=shallow --no-save --omit=dev --no-package-lock --ignore-scripts
+	rm -rf $(TMP_DIR)/npm-cache-$(TMPNPM)
+	rm -f $(PKG_BUILD_DIR)/node_modules/.package-lock.json
+	find $(PKG_BUILD_DIR)/node_modules -type d -empty -print0 | xargs -0 rmdir || true
+	rm -rf $(PKG_BUILD_DIR)/node_modules/esbuild/node_modules/@esbuild
+	rm -rf $(PKG_BUILD_DIR)/node_modules/rollup/node_modules/@rollup
+endef
+
+define Package/node-picocolors/install
+	$(INSTALL_DIR) $(1)/usr/lib/node/$(PKG_NPM_NAME)
+	$(CP) $(PKG_BUILD_DIR)/{package.json,LICENSE,*.js,*.ts,*.md} \
+		$(1)/usr/lib/node/$(PKG_NPM_NAME)/
+	$(CP) $(PKG_BUILD_DIR)/node_modules \
+		$(1)/usr/lib/node/$(PKG_NPM_NAME)/
+	$(INSTALL_DIR) $(1)/usr/lib/node_modules
+	$(LN) ../node/$(PKG_NPM_NAME) $(1)/usr/lib/node_modules/$(PKG_NPM_NAME)
+endef
+
+define Package/node-picocolors/postrm
+#!/bin/sh
+rm /usr/lib/node_modules/picocolors || true
+rm -rf /usr/lib/node/picocolors || true
+endef
+
+define Host/Compile
+	cd $(HOST_BUILD_DIR); \
+	$(HOST_MAKE_VARS) \
+	npm_config_nodedir=$(STAGING_DIR)/usr/ \
+	$(if $(CONFIG_NODEJS_NPM_KEEP_CACHE), npm_config_cache=$(NPM_CACHE_DIR)/host-npm-cache-$(PKG_NPM_NAME),npm_config_cache=$(TMP_DIR)/npm-cache-$(HOSTTMPNPM)) \
+	npm install --prefer-offline --no-audit --global-style --install-strategy=shallow --no-save --omit=dev --no-package-lock --ignore-scripts
+	rm -rf $(TMP_DIR)/npm-cache-$(HOSTTMPNPM)
+	rm -f $(HOST_BUILD_DIR)/node_modules/.package-lock.json
+	find $(HOST_BUILD_DIR)/node_modules -type d -empty -print0 | xargs -0 rmdir || true
+endef
+
+define Host/Install
+	$(INSTALL_DIR) $(1)/lib/node_modules/$(PKG_NPM_NAME)
+	$(CP) $(HOST_BUILD_DIR)/{package.json,LICENSE,*.js,*.ts,*.md} \
+		$(1)/lib/node_modules/$(PKG_NPM_NAME)/
+	$(CP) $(HOST_BUILD_DIR)/node_modules \
+		$(1)/lib/node_modules/$(PKG_NPM_NAME)/
+endef
+
 $(eval $(call HostBuild))
+$(eval $(call BuildPackage,node-picocolors))
