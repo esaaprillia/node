@@ -69,8 +69,8 @@ define Package/node-update-browserslist-db/install
 	$(INSTALL_DIR) $(1)/usr/lib/node/$(PKG_NPM_NAME)
 	$(CP) $(PKG_BUILD_DIR)/{package.json,LICENSE,*.js,*.ts,*.md} \
 		$(1)/usr/lib/node/$(PKG_NPM_NAME)/
-	$(CP) $(PKG_BUILD_DIR)/{node_modules} \
-		$(1)/usr/lib/node/$(PKG_NPM_NAME)/
+#	$(CP) $(PKG_BUILD_DIR)/{node_modules} \
+#		$(1)/usr/lib/node/$(PKG_NPM_NAME)/
 	$(INSTALL_DIR) $(1)/usr/bin
 	$(LN) ../lib/node/$(PKG_NPM_NAME)/cli.js $(1)/usr/bin/update-browserslist-db
 	$(INSTALL_DIR) $(1)/usr/lib/node_modules
