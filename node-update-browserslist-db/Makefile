@@ -33,7 +33,7 @@ define Package/node-update-browserslist-db
   CATEGORY:=Languages
   TITLE:=Share target browsers between different front-end tools, like Autoprefixer, Stylelint and babel-preset-env
   URL:=https://www.npmjs.com/package/update-browserslist-db
-  DEPENDS:=+node +node-escalade +node-picocolors
+  DEPENDS:=+node
 endef
 
 define Package/node-update-browserslist-db/description
