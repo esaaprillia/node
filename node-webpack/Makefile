@@ -6,12 +6,12 @@ include $(TOPDIR)/rules.mk
 
 PKG_NPM_NAME:=webpack
 PKG_NAME:=node-$(PKG_NPM_NAME)
-PKG_VERSION:=5.92.0
+PKG_VERSION:=5.91.0
 PKG_RELEASE:=1
 
 PKG_SOURCE:=$(PKG_NPM_NAME)-$(PKG_VERSION).tgz
 PKG_SOURCE_URL:=https://registry.npmjs.org/$(PKG_NPM_NAME)/-/
-PKG_HASH:=095b6472d1da5bf13efd43a755298e0d348e062468e004799e89b7e449b4585d
+PKG_HASH:=skip
 
 PKG_MAINTAINER:=@esaaprillia, Hirokazu MORIKAWA <morikw2@gmail.com>
 PKG_LICENSE:=MIT
