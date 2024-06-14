@@ -62,7 +62,7 @@ define Package/node-picocolors/install
 	$(INSTALL_DIR) $(1)/usr/lib/node/$(PKG_NPM_NAME)
 	$(CP) $(PKG_BUILD_DIR)/{package.json,LICENSE,*.js,*.ts,*.md} \
 		$(1)/usr/lib/node/$(PKG_NPM_NAME)/
-#	$(CP) $(PKG_BUILD_DIR)/node_modules \
+#	$(CP) $(PKG_BUILD_DIR)/{node_modules} \
 #		$(1)/usr/lib/node/$(PKG_NPM_NAME)/
 	$(INSTALL_DIR) $(1)/usr/lib/node_modules
 	$(LN) ../node/$(PKG_NPM_NAME) $(1)/usr/lib/node_modules/$(PKG_NPM_NAME)
