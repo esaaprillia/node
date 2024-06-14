@@ -11,7 +11,7 @@ PKG_RELEASE:=1
 
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE_URL:=https://github.com/morethanwords/tweb.git
-PKG_SOURCE_VERSION:=90ee161a766e860f920fbebfe9bc62a451b8e361
+PKG_SOURCE_VERSION:=0f6418435404b13b8693f0f3064efde9fd9a6e6a
 PKG_MIRROR_HASH:=skip
 
 PKG_MAINTAINER:=Esa Aprilia Salsabila <esaapriliasalsabila@gmail.com>
