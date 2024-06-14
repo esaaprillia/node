@@ -60,7 +60,7 @@ define Build/Compile
 	npm install --prefer-offline --no-audit --global-style --install-strategy=shallow --no-save --omit=dev --no-package-lock --ignore-scripts
 	rm -rf $(TMP_DIR)/npm-cache-$(TMPNPM)
 	rm -f $(PKG_BUILD_DIR)/node_modules/.package-lock.json
-	find $(PKG_BUILD_DIR)/node_modules -type d -empty -print0 | xargs -0 rmdir || true
+	find $(PKG_BUILD_DIR)/node_modules -type d -empty -print0 | xargs -0 -r rmdir || true
 	rm -rf $(PKG_BUILD_DIR)/node_modules/esbuild/node_modules/@esbuild
 	rm -rf $(PKG_BUILD_DIR)/node_modules/rollup/node_modules/@rollup
 endef
@@ -69,8 +69,8 @@ define Package/node-update-browserslist-db/install
 	$(INSTALL_DIR) $(1)/usr/lib/node/$(PKG_NPM_NAME)
 	$(CP) $(PKG_BUILD_DIR)/{package.json,LICENSE,*.js,*.ts,*.md} \
 		$(1)/usr/lib/node/$(PKG_NPM_NAME)/
-#	$(CP) $(PKG_BUILD_DIR)/{node_modules} \
-#		$(1)/usr/lib/node/$(PKG_NPM_NAME)/
+	$(CP) $(PKG_BUILD_DIR)/{node_modules} \
+		$(1)/usr/lib/node/$(PKG_NPM_NAME)/
 	$(INSTALL_DIR) $(1)/usr/bin
 	$(LN) ../lib/node/$(PKG_NPM_NAME)/cli.js $(1)/usr/bin/update-browserslist-db
 	$(INSTALL_DIR) $(1)/usr/lib/node_modules
